@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://127.0.0.1:27017", {
-  dbName: "pawfect",
+// Atlas: mongodb+srv://<username>:<password>@pawfect-cluster.gk5xr.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+//Mongodb on your own computer mongodb://127.0.0.1:27017
+
+mongoose.connect("mongodb+srv://admin:admin@pawfect-cluster.gk5xr.mongodb.net/users?retryWrites=true&w=majority", {
+  dbName: "pawfect", useNewUrlParser: true, useUnifiedTopology: true
 });
 
 mongoose.connection.on("open", () => console.log("connected to mongoDB"));

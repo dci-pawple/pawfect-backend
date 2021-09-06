@@ -3,7 +3,7 @@ const faker = require("faker");
 
 const UserModel = require("../models/userSchema");
 
-mongoose.connect("mongodb://127.0.0.1:27017/pawfect", () =>
+mongoose.connect("mongodb+srv://admin:admin@pawfect-cluster.gk5xr.mongodb.net/pawfect?retryWrites=true&w=majority", () =>
   console.log("connected to pawfect DB")
 );
 
@@ -17,6 +17,7 @@ const seedData = async () => {
         const user = new UserModel({
           firstName: faker.name.firstName(),
           lastName: faker.name.lastName(),
+          email: faker.name.email(),
         });
 
         return user.save();

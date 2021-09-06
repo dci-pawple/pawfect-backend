@@ -18,6 +18,7 @@
   "homepage": "https://github.com/dci-pawple/pawfect-backend#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "http-errors": "^1.8.0",
     "mongodb": "^4.1.1",
     "mongoose": "^6.0.4"
   },

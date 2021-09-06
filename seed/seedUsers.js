@@ -19,6 +19,7 @@ const seedData = async () => {
           firstName: faker.name.firstName(),
           lastName: faker.name.lastName(),
           email: faker.internet.email(),
+          password: "123456",
         });
 
         return user.save();

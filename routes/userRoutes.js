@@ -14,4 +14,10 @@ Route.get("/", async (req, res, next) => {
   }
 });
 
+
+// add a new User 
+Route.post("/", async (req, res, next) => {
+})
+
+
 module.exports = Route;

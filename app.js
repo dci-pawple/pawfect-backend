@@ -5,11 +5,18 @@ require("./connectMongo");
 
 const userRoutes = require("./routes/userRoutes");
 const petRoutes = require("./routes/petRoutes");
+const cors = require( "cors" );
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+app.use( cors( { origin: "*" } ) )
+
+//app.use( express.urlencoded( { extended: true } ) );
 app.use(express.json());
+
+
+
 
 // TODO: make the callback async for mongo
 // app.use(

@@ -43,7 +43,7 @@ Route.post("/", async (req, res, next) => {
      console.log("User=>",user);
     if(!user){
       
-      res.json({ success: "you are registered" });
+     
        new UserModel({
           email,
           firstName,
@@ -52,15 +52,17 @@ Route.post("/", async (req, res, next) => {
         }).save((err) => {
           if (err) console.log(err);
         })
+        res.json({ success: true ,info:"you are registered"});
         console.log("you are registered");
 
 
     }else{
       console.log(email + " already registered!");
-      res.json({ error: email + " already registered!" });
+      next(new createError.Conflict(email + " already registered!" ));
     }
-  } catch(e){
-      console.log("Error in Rout Add User =>",e);
+  } catch(err){
+      console.log("Error in Rout Add User =>",err);
+      next("Error in Rout Add User =>",err)
   }
 })
 

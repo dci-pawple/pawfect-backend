@@ -29,4 +29,8 @@ app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/pets", petRoutes);
 
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).send({ success: false, message: err.message });
+});
+
 app.listen(PORT, () => console.log("Server running on port: ", PORT));

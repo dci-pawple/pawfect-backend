@@ -17,7 +17,8 @@ const seedData = async () => {
         const user = new UserModel({
           firstName: faker.name.firstName(),
           lastName: faker.name.lastName(),
-          email: faker.name.email(),
+          email: faker.internet.email(),
+          password: faker.internet.password(),
         });
 
         return user.save();

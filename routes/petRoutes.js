@@ -1,61 +1,61 @@
-const express = require('express')
+const express = require("express");
 
-const PetModel = require('../models/petSchema')
+const PetModel = require("../models/petSchema");
 
-const Route = express.Router()
+const Route = express.Router();
 
-var multer = require('multer')
+const multer = require("multer");
 
-Route.get('/', async (req, res, next) => {
-  console.log('pets')
+Route.get("/", async (req, res, next) => {
+  console.log("pets");
   try {
-    const pets = await PetModel.find({})
-    res.json({ succes: true, data: pets })
+    const pets = await PetModel.find({});
+    res.json({ succes: true, data: pets });
   } catch (err) {
-    next(err)
+    next(err);
   }
-})
+});
 
 /**
  * Route for new Ad
  */
 
 let storage = multer.diskStorage({
-  destination: 'public/images/',
+  destination: "public/images/",
   filename: function (req, file, cb) {
     let picName =
-      file.originalname.split('.')[0] +
-      '-' +
+      file.originalname.split(".")[0] +
+      "-" +
       Date.now() +
-      '.' +
-      file.mimetype.split('/')[1]
-    cb(null, picName)
-    req.picName = picName
-  }
-})
+      "." +
+      file.mimetype.split("/")[1];
+    cb(null, picName);
+    req.picName = picName;
+  },
+});
 
-let upload = multer({ storage: storage })
+let upload = multer({ storage: storage });
 
-Route.post('/newpet', upload.array('file', 10), function (req, res, next) {
+Route.post("/newpet", upload.array("file", 10), function (req, res, next) {
   try {
     //contains the file
-    console.log('req.files', req.files)
+    console.log("req.files", req.files);
     //contains the text fields
-    console.log('req.body', req.body)
+    console.log("req.body", req.body);
 
     let pet = new PetModel({
       name: req.body.name,
-      age: req.body.age
+      age: req.body.age,
       //images: req.files,
-    })
+    });
 
-    pet.save().then(result => {
-      res.send(result)
-    })
+    pet.save().then((result) => {
+      res.send(result);
+    });
     // res.send('respond with a resource');
   } catch (err) {
-    console.log('Error in file upload Route =>', err)
+    console.log("Error in file upload Route =>", err);
   }
-})
+});
 
-module.exports = Route
+module.exports = Route;

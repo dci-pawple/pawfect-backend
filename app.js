@@ -1,5 +1,6 @@
 const express = require("express");
 require("./connectMongo");
+const path = require("path");
 
 // const Route = require("./routes/userRoutes");
 
@@ -12,9 +13,12 @@ const PORT = process.env.PORT || 4000;
 
 app.use( cors( { origin: "*" } ) )
 
-//app.use( express.urlencoded( { extended: true } ) );
+// needed urlencoded to see data in req.body and for getting files
+app.use( express.urlencoded( { extended: true } ) );
 app.use(express.json());
 
+// use public folder for storing images there
+app.use(express.static(path.join(__dirname, "./public")));
 
 
 

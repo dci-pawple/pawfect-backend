@@ -11,7 +11,7 @@ const petSchema = new mongoose.Schema({
       habits: String,
       size: String,
       extras: String,
-      photos: [String],
+      photos: [],
 });
 
 const PetModel = mongoose.model("pets", petSchema);

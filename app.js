@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, "./public")));
 
 Route.get("/", (req, res, next) => {
     res.send("hello sexy paw");
-  })
+  }) 
 
 app.use("/users", userRoutes);
 app.use("/pets", petRoutes);

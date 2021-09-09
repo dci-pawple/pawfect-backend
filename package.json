@@ -5,7 +5,6 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
-     "heroku": "node app.js"
   },
   "repository": {
     "type": "git",

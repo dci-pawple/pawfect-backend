@@ -29,5 +29,8 @@
   "devDependencies": {
     "faker": "^5.5.3",
     "nodemon": "^2.0.12"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }

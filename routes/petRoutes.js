@@ -36,22 +36,24 @@ let storage = multer.diskStorage({
 
 let upload = multer({ storage: storage })
 
-Route.post('/newpet', upload.array('file', 10), function (req, res, next) {
+Route.post('/newpet', upload.any('photos'), async (req, res, next)=> {
   try {
     //contains the file
     console.log('req.files', req.files)
     //contains the text fields
-    console.log('req.body', req.body)
+    console.log('req.body',JSON.parse(JSON.stringify(req.body)))
 
-    let pet = new PetModel({
-      name: req.body.name,
-      age: req.body.age
-      //images: req.files,
-    })
+    console.log();
 
-    pet.save().then(result => {
-      res.send(result)
-    })
+    // let pet = new PetModel({
+    //   name: req.body.name,
+    //   age: req.body.age
+    //   //images: req.files,
+    // })
+// 
+//     pet.save().then(result => {
+//       res.send(result)
+//     })
     // res.send('respond with a resource');
   } catch (err) {
     console.log('Error in file upload Route =>', err)

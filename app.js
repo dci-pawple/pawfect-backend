@@ -31,7 +31,7 @@ app.use(express.static(path.join(__dirname, "./public")));
 // );
 
 app.get("/", (req, res, next) => {
-    res.send("hello sexy paw");
+    res.send("hello sexy paw" --- use "/users" to get all user! --- use "/pets" to get all pets! ");
   })
   //test 
 

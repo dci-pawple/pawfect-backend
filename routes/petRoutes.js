@@ -44,7 +44,7 @@ Route.post('/newpet', upload.any('photos'), async (req, res, next) => {
     console.log('req.body', JSON.parse(JSON.stringify(req.body)))
 
     //delete collection pets
-    await PetModel.deleteMany({});
+    //await PetModel.deleteMany({});
 
     const photoFiles = req.files
     if (photoFiles.length === 0) {
@@ -58,8 +58,6 @@ Route.post('/newpet', upload.any('photos'), async (req, res, next) => {
     )
 
     let photoResponses = await Promise.all(multiplePhotoPromise)
-
-    console.log('imageResponses', photoResponses)
 
     const photoUrls = photoResponses.map(item => {
       return { url: item.url, publicId: item.public_id }
@@ -79,7 +77,6 @@ Route.post('/newpet', upload.any('photos'), async (req, res, next) => {
       extras: req.body.extras,
       photos: photoUrls
     })
-    console.log('pet', pet)
 
     pet.save().then(result => {
       console.log('Saved in the Database')
@@ -89,7 +86,7 @@ Route.post('/newpet', upload.any('photos'), async (req, res, next) => {
     })
   } catch (err) {
     console.log('Error in file upload Route =>', err)
-    res.status(500).json({
+    res.status(500).json({success: false,
       message: err.message
     })
   }

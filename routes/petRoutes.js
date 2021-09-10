@@ -17,6 +17,26 @@ Route.get('/', async (req, res, next) => {
   }
 })
 
+
+Route.get("/:id", async (req, res, next) => {
+  try {
+    // const pet = await PetModel.findOne({ id: req.params.id });
+    const pet = await PetModel.findById(req.params.id).select(
+      "-_id -password -__v"
+    );
+    if (pet) {
+      res.json({ success: true, data: pet });
+    } else {
+      res.json({ success: false, error: "no such pet found" });
+    
+    }
+  } catch (err) {
+     console.log('Error in pet /:id =>', err)
+    next(err);
+  }
+});
+
+
 /**
  * Route for new Ad
  */

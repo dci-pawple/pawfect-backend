@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/dci-pawple/pawfect-backend#readme",
   "dependencies": {
+    "cloudinary": "^1.26.3",
     "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "http-errors": "^1.8.0",
     "mongodb": "^4.1.1",
@@ -27,5 +29,8 @@
   "devDependencies": {
     "faker": "^5.5.3",
     "nodemon": "^2.0.12"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }

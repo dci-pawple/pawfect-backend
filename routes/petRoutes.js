@@ -17,6 +17,37 @@ Route.get('/', async (req, res, next) => {
   }
 })
 
+Route.get('/filter', async (req, res, next) => {
+console.log("req.query",req.query);
+  try {
+    
+    let filteredData={};
+
+    if(req.query){
+
+      let  type=req.query.type;
+      if(type!=="all"){
+           filteredData = await PetModel.find({typeOfPet:type})
+      }else{
+         filteredData = await PetModel.find({})
+      }
+       
+
+
+
+      res.json({ success: true,data: filteredData})
+    }else{
+       res.json({ success: false,message: "no filter defined in yuery"})
+    }
+   
+   
+  } catch (err) {
+   
+    next(err)
+  }
+})
+
+
 
 Route.get("/:id", async (req, res, next) => {
   try {

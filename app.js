@@ -20,8 +20,6 @@ app.use(express.json());
 // use public folder for storing images there
 app.use(express.static(path.join(__dirname, "./public")));
 
-
-
 // TODO: make the callback async for mongo
 // app.use(
 //   "/",
@@ -29,6 +27,10 @@ app.use(express.static(path.join(__dirname, "./public")));
 //     res.send("hello sexy paw");
 //   })
 // );
+
+app.get("/", (req, res, next) => {
+    res.send(`hello sexy paw --- use "/users" to get all user! --- use "/pets" to get all pets! `);
+  })
 
 app.use("/users", userRoutes);
 app.use("/pets", petRoutes);

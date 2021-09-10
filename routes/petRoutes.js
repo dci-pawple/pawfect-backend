@@ -1,10 +1,11 @@
 const express = require('express')
+const { cloudinary } = require('../utils/Cloudinary')
 
 const PetModel = require('../models/petSchema')
 
 const Route = express.Router()
 
-var multer = require('multer')
+const multer = require('multer')
 
 Route.get('/', async (req, res, next) => {
   console.log('pets')
@@ -21,7 +22,6 @@ Route.get('/', async (req, res, next) => {
  */
 
 let storage = multer.diskStorage({
-  destination: 'public/images/',
   filename: function (req, file, cb) {
     let picName =
       file.originalname.split('.')[0] +
@@ -36,25 +36,59 @@ let storage = multer.diskStorage({
 
 let upload = multer({ storage: storage })
 
-Route.post('/newpet', upload.array('file', 10), function (req, res, next) {
+Route.post('/newpet', upload.any('photos'), async (req, res, next) => {
   try {
     //contains the file
     console.log('req.files', req.files)
     //contains the text fields
-    console.log('req.body', req.body)
+    console.log('req.body', JSON.parse(JSON.stringify(req.body)))
+
+    //delete collection pets
+    //await PetModel.deleteMany({});
+
+    const photoFiles = req.files
+    if (photoFiles.length === 0) {
+      console.log('No photo attached!')
+      return res
+        .status(400)
+        .json({ success: false, message: 'No photo attached!' })
+    }
+    let multiplePhotoPromise = photoFiles.map(photo =>
+      cloudinary.uploader.upload(photo.path, { upload_preset: 'pawfect' })
+    )
+
+    let photoResponses = await Promise.all(multiplePhotoPromise)
+
+    const photoUrls = photoResponses.map(item => {
+      return { url: item.url, publicId: item.public_id }
+    })
+    console.log('photoUrls', photoUrls)
 
     let pet = new PetModel({
       name: req.body.name,
-      age: req.body.age
-      //images: req.files,
+      age: req.body.age,
+      typeOfPet: req.body.typeOfPet,
+      gender: req.body.gender,
+      // breed: req.body.name,
+      likes: req.body.likes,
+      dislikes: req.body.dislikes,
+      habits: req.body.habits,
+      size: req.body.size,
+      extras: req.body.extras,
+      photos: photoUrls
     })
 
     pet.save().then(result => {
-      res.send(result)
+      console.log('Saved in the Database')
+      return res
+        .status(400)
+        .json({ success: true, message: 'Saved in the Database' })
     })
-    // res.send('respond with a resource');
   } catch (err) {
     console.log('Error in file upload Route =>', err)
+    res.status(500).json({success: false,
+      message: err.message
+    })
   }
 })
 

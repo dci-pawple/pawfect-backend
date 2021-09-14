@@ -78,6 +78,45 @@ Route.post("/login", async (req, res, next) => {
   }
 });
 
+// save favorites
+Route.post("/save", async (req, res, next) => {
+  console.log("in save favorites");
+  try {
+    const userId = req.body.user_id;
+    const petId=req.body.pet_id;
+    console.log("userId",userId);
+    console.log("petId",petId);
+
+    const user = await UserModel.findOne({ _id: userId });
+ 
+    if (!userId) {
+      next(new createError.NotFound("no user with such id found"));
+    } else {
+
+        if(user.savedFavorites.includes(petId))
+        {
+          //delete petId from favorites
+          user.savedFavorites=user.savedFavorites.filter( favorite => favorite!==petId)
+          user.save();
+          res.json({ success: true, message: "unsaved successfully" });
+        }else{
+          //create new petId in favorites
+        console.log("user.savedFavorites=>",user.savedFavorites);
+        user.savedFavorites.push(petId);
+        user.save();
+        console.log("user=>",user);
+        
+         res.json({ success: true, message: "Saved successfully" });
+         }
+    }
+  } catch (err) {
+    next(err);
+  }
+
+});
+
+
+
 Route.patch("/:id", async (req, res, next) => {
   try {
     // const user = await UserModel.findOne({ id: req.params.id });

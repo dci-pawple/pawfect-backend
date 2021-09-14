@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   street: String,
   email: String,
   password: String,
+  savedFavorites: [String],
 });
 
 const UserModel = mongoose.model("users", userSchema);

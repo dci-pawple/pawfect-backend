@@ -19,12 +19,16 @@ Route.get('/', async (req, res, next) => {
 
 Route.get('/filter', async (req, res, next) => {
 console.log("req.query",req.query);
+
+
+
   try {
     
-    let filteredData={};
+    let filteredData= {};
 
     if(req.query){
 
+      // filter TYPE
       let  type=req.query.type;
       if(type!=="all"){
            filteredData = await PetModel.find({typeOfPet:type})
@@ -33,11 +37,17 @@ console.log("req.query",req.query);
       }
        
 
-
+      // // filter FAVORITES
+      // let  favorite=req.query.favorite;
+      // 
+      // if(favorite===true)
+      // {
+      //     filteredData= filteredData.find({})
+      // }
 
       res.json({ success: true,data: filteredData})
     }else{
-       res.json({ success: false,message: "no filter defined in yuery"})
+       res.json({ success: false,message: "no filter defined in query"})
     }
    
    

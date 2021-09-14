@@ -79,12 +79,12 @@ Route.post("/login", async (req, res, next) => {
 });
 
 // save favorites
-Route.post("/save", async (req, res, next) => {
+Route.patch("/save", async (req, res, next) => {
   console.log("in save favorites");
   try {
     const userId = req.body.user_id;
     const petId=req.body.pet_id;
-    console.log("userId",userId);
+    console.log("userId",req.body);
     console.log("petId",petId);
 
     const user = await UserModel.findOne({ _id: userId });

@@ -136,7 +136,8 @@ Route.post('/newpet', upload.any('photos'), async (req, res, next) => {
       habits: req.body.habits,
       size: req.body.size,
       extras: req.body.extras,
-      photos: photoUrls
+      photos: photoUrls,
+      userId: req.body.userId,
     })
 
     pet.save().then(result => {

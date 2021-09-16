@@ -2,6 +2,7 @@ const express = require('express')
 const { cloudinary } = require('../utils/Cloudinary')
 
 const PetModel = require('../models/petSchema')
+const UserModel = require('../models/userSchema')
 
 const Route = express.Router()
 
@@ -19,23 +20,67 @@ Route.get('/', async (req, res, next) => {
 
 Route.get('/filter', async (req, res, next) => {
 console.log("req.query",req.query);
-
-
-
   try {
-    
-    let filteredData= {};
+const  type=req.query.type;
+const  age=JSON.parse(req.query.age);
+const  favorites=JSON.parse(req.query.favorites);
+console.log({favorites});
+const  userId=req.query.userId;
+console.log({userId});
+ const user= await UserModel.findById(userId).select(
+      "-_id -password -__v"
+    );
+console.log("type",type);
+console.log({age});
 
+
+
+let currentFilter= [];
+
+type!=='' && type!=='all'?currentFilter.push({typeOfPet:type}):currentFilter.push({});
+age!=='' && age.length!==0 ?currentFilter.push({age:age}):currentFilter.push({});
+if(userId&&favorites===true){
+ 
+   console.log({user});
+  const savedFavorites=user.savedFavorites;
+  console.log({savedFavorites});
+favorites && currentFilter.push({_id:savedFavorites});
+}
+// for testing mongodb filter
+currentFilter= {
+  $and: currentFilter
+}
+
+console.log("current Filter",currentFilter);
+
+
+
+    let filteredData= {};
     if(req.query){
 
-      // filter TYPE
-      let  type=req.query.type;
-      if(type!=="all"){
-           filteredData = await PetModel.find({typeOfPet:type})
-      }else{
-         filteredData = await PetModel.find({})
-      }
-       
+           filteredData = await PetModel.find(currentFilter)
+
+
+     
+           filteredData=filteredData.map((pet)=>{
+          const petId=(pet._id).toString();
+          console.log({pet});
+          console.log({petId});
+          console.log(user.savedFavorites);
+          if(user.savedFavorites.includes(petId))
+          {
+          pet.usersFavorite=true;
+          }else{
+            pet.usersFavorite=false;
+          }
+         
+          return pet;
+        })
+    
+    
+      
+         
+
 
       // // filter FAVORITES
       // let  favorite=req.query.favorite;

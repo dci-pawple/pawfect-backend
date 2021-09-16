@@ -14,7 +14,7 @@ const seedData = async () => {
       .map(() => {
         const pet = new PetModel({
           name: faker.name.firstName(),
-          age: Math.round(Math.random() * 15),
+          age: ['baby', 'young', 'adult','senior'][Math.floor(Math.random() * 4)],
           typeOfPet: ['cat', 'dog', 'others'][Math.floor(Math.random() * 3)],
           gender: ['male', 'female'][Math.floor(Math.random() * 2)],
           // breed: String,

@@ -18,110 +18,95 @@ Route.get('/', async (req, res, next) => {
   }
 })
 
+
 Route.get('/filter', async (req, res, next) => {
-console.log("req.query",req.query);
+  console.log('req.query', req.query)
   try {
-const  type=req.query.type;
-const  age=JSON.parse(req.query.age);
-const  favorites=JSON.parse(req.query.favorites);
-console.log({favorites});
-const  userId=req.query.userId;
-console.log({userId});
- const user= await UserModel.findById(userId).select(
-      "-_id -password -__v"
-    );
-console.log("type",type);
-console.log({age});
+    const type = req.query.type? req.query.type:"";
+    const age = req.query.age ? JSON.parse(req.query.age):"";
+    const favorites = req.query.favorites ? JSON.parse(req.query.favorites):"";
+    const userId = req.query.userId?req.query.userId:"";
+    const user = userId? await UserModel.findById(userId).select('-_id -password -__v'):null;
+    console.log('type', type)
+    console.log({ age })
+    console.log({ userId })
+    console.log({ favorites })
 
+    let currentFilter = []
 
+    type !== '' && type !== 'all'
+      ? currentFilter.push({ typeOfPet: type })
+      : currentFilter.push({})
 
-let currentFilter= [];
+    age !== '' && age.length !== 0
+      ? currentFilter.push({ age: age })
+      : currentFilter.push({})
 
-type!=='' && type!=='all'?currentFilter.push({typeOfPet:type}):currentFilter.push({});
-age!=='' && age.length!==0 ?currentFilter.push({age:age}):currentFilter.push({});
-if(userId&&favorites===true){
- 
-   console.log({user});
-  const savedFavorites=user.savedFavorites;
-  console.log({savedFavorites});
-favorites && currentFilter.push({_id:savedFavorites});
-}
-// for testing mongodb filter
-currentFilter= {
-  $and: currentFilter
-}
+    if (userId && favorites === true || favorites!=="") {
+      console.log({ user })
+      const savedFavorites = user.savedFavorites
+      console.log({ savedFavorites })
+      favorites && currentFilter.push({ _id: savedFavorites })
+    }
+    // for testing mongodb filter
+    currentFilter = {
+      $and: currentFilter
+    }
 
-console.log("current Filter",currentFilter);
+    console.log('current Filter', currentFilter)
 
+    let filteredData = {}
+    if (req.query ) {
+      filteredData = await PetModel.find(currentFilter)
 
+      if(user){
+      filteredData = filteredData.map(pet => {
+        const petId = pet._id.toString()
+        console.log({ pet })
+        console.log({ petId })
+        console.log(user.savedFavorites)
+        if (user.savedFavorites.includes(petId)) {
+          pet.usersFavorite = true
+        } else {
+          pet.usersFavorite = false
+        }
 
-    let filteredData= {};
-    if(req.query){
-
-           filteredData = await PetModel.find(currentFilter)
-
-
-     
-           filteredData=filteredData.map((pet)=>{
-          const petId=(pet._id).toString();
-          console.log({pet});
-          console.log({petId});
-          console.log(user.savedFavorites);
-          if(user.savedFavorites.includes(petId))
-          {
-          pet.usersFavorite=true;
-          }else{
-            pet.usersFavorite=false;
-          }
-         
-          return pet;
-        })
-    
-    
-      
-         
-
+        return pet
+      })}
 
       // // filter FAVORITES
       // let  favorite=req.query.favorite;
-      // 
+      //
       // if(favorite===true)
       // {
       //     filteredData= filteredData.find({})
       // }
 
-      res.json({ success: true,data: filteredData})
-    }else{
-       res.json({ success: false,message: "no filter defined in query"})
+      res.json({ success: true, data: filteredData })
+    } else {
+      res.json({ success: false, message: 'no filter defined in query' })
     }
-   
-   
   } catch (err) {
-   
     next(err)
   }
 })
 
-
-
-Route.get("/:id", async (req, res, next) => {
+Route.get('/:id', async (req, res, next) => {
   try {
     // const pet = await PetModel.findOne({ id: req.params.id });
     const pet = await PetModel.findById(req.params.id).select(
-      "-_id -password -__v"
-    );
+      '-_id -password -__v'
+    )
     if (pet) {
-      res.json({ success: true, data: pet });
+      res.json({ success: true, data: pet })
     } else {
-      res.json({ success: false, error: "no such pet found" });
-    
+      res.json({ success: false, error: 'no such pet found' })
     }
   } catch (err) {
-     console.log('Error in pet /:id =>', err)
-    next(err);
+    console.log('Error in pet /:id =>', err)
+    next(err)
   }
-});
-
+})
 
 /**
  * Route for new Ad
@@ -182,7 +167,7 @@ Route.post('/newpet', upload.any('photos'), async (req, res, next) => {
       size: req.body.size,
       extras: req.body.extras,
       photos: photoUrls,
-      userId: req.body.userId,
+      userId: req.body.userId
     })
 
     pet.save().then(result => {
@@ -193,9 +178,7 @@ Route.post('/newpet', upload.any('photos'), async (req, res, next) => {
     })
   } catch (err) {
     console.log('Error in file upload Route =>', err)
-    res.status(500).json({success: false,
-      message: err.message
-    })
+    res.status(500).json({ success: false, message: err.message })
   }
 })
 

@@ -116,7 +116,7 @@ Route.get( '/:id', async ( req, res, next ) => {
   try {
     // const pet = await PetModel.findOne({ id: req.params.id });
     const pet = await PetModel.findById( req.params.id ).select(
-      '-_id -password -__v'
+      ' -__v'
     )
     if ( pet ) {
       res.json( { success: true, data: pet } )
@@ -194,7 +194,7 @@ Route.post( '/newpet', upload.any( 'photos' ), async ( req, res, next ) => {
     pet.save().then( result => {
       console.log( 'Saved in the Database' )
       return res
-        .json( { success: true, message: 'Saved in the Database' } )
+        .json( { success: true, message: 'Saved in the Database',data:result } )
     } )
   } catch ( err ) {
     console.log( 'Error in file upload Route =>', err )

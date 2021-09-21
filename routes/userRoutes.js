@@ -82,13 +82,17 @@ Route.post("/login", async (req, res, next) => {
 Route.patch("/save", async (req, res, next) => {
   console.log("in save favorites");
   try {
+
+    //$set
+
     const userId = req.body.user_id;
     const petId=req.body.pet_id;
-    console.log("userId",req.body);
+    console.log("userId",userId);
     console.log("petId",petId);
 
     const user = await UserModel.findOne({ _id: userId });
- 
+    console.log("user",user);
+
     if (!userId) {
       next(new createError.NotFound("no user with such id found"));
     } else {
@@ -96,18 +100,26 @@ Route.patch("/save", async (req, res, next) => {
         if(user.savedFavorites.includes(petId))
         {
           //delete petId from favorites
+          console.log("old user.savedFavorites",user.savedFavorites);
+          console.log("old user",user);
           user.savedFavorites=user.savedFavorites.filter( favorite => favorite!==petId)
+           console.log("new user.savedFavorites",user.savedFavorites);
+           console.log("new user",user);
           user.save();
-          res.json({ success: true, message: "unsaved successfully" });
-        }else{
+          return res.json({ success: true, message: "unsaved successfully",savedFavorites: user.savedFavorites });
+        }
+        
+        else{
           //create new petId in favorites
         console.log("user.savedFavorites=>",user.savedFavorites);
         user.savedFavorites.push(petId);
         user.save();
         console.log("user=>",user);
         
-         res.json({ success: true, message: "Saved successfully" });
+         return res.json({ success: true, message: "Saved successfully",savedFavorites: user.savedFavorites });
          }
+
+        
     }
   } catch (err) {
     next(err);

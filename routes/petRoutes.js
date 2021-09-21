@@ -29,9 +29,9 @@ Route.get( '/filter', async ( req, res, next ) => {
   const type = req.query.type ? req.query.type : ''
   const age = req.query.age ? JSON.parse( req.query.age ) : ''
   const favorites = req.query.favorites ? JSON.parse( req.query.favorites ) : ''
-   console.log( "Hallo" );
+
   const userId = req.query.userId ? req.query.userId: '';
-     console.log( "Hallo" );
+
   let user =null;
 
   //log all
@@ -63,11 +63,11 @@ Route.get( '/filter', async ( req, res, next ) => {
       : currentFilter.push( {} )
 
     // if logged in
-    if ( userId || userId && favorites ) {
+    if (userId || userId && favorites ) {
       console.log( "logged in user" );
       console.log({userId});
       [user] = await UserModel.find( {_id: userId} ).select( '-_id -password -__v' );
-       console.log( { user } )
+       console.log("user in filter route", user  )
        if(!user){
        next(new createError.NotFound("no user with such id found"));
        }
@@ -75,10 +75,10 @@ Route.get( '/filter', async ( req, res, next ) => {
      
       // get users saved Favorites
       const savedFavorites =  user.savedFavorites
-      console.log( { savedFavorites } )
+    
 
       // put the favorite pet id´s to the current filter
-      savedFavorites && currentFilter.push( { _id: savedFavorites } )
+      favorites && currentFilter.push( { _id: savedFavorites } )
     }
 
     currentFilter = {
@@ -89,9 +89,9 @@ Route.get( '/filter', async ( req, res, next ) => {
 
     let filteredData = [];
     filteredData = await PetModel.find( currentFilter )
-    console.log(  filteredData )
+   
     // if logged in
-         
+    if(user){
           filteredData.map(pet => {
             const petId = pet._id.toString();
             if (user.savedFavorites.includes(petId)) {
@@ -99,9 +99,8 @@ Route.get( '/filter', async ( req, res, next ) => {
             } else {
               pet.usersFavorite = false
             }
-          })
-  
-  console.log( { filteredData } )
+          })}
+
    
     if ( filteredData ) {
       res.json( { success: true, data: filteredData } )

@@ -1,23 +1,20 @@
-const mongoose = require('mongoose')
-const faker = require('faker')
-​
-const PetModel = require('../models/petSchema')
-​
+const mongoose = require('mongoose');
+const faker = require('faker');
+const PetModel = require("../models/petSchema");
+
 mongoose.connect(
   'mongodb+srv://admin:admin@pawfect-cluster.gk5xr.mongodb.net/pawfect?retryWrites=true&w=majority',
   () => console.log('connected to pawfect DB')
-)
-​
+);
 const seedData = async () => {
   try {
-    await PetModel.deleteMany({})
-​
+    //nodeawait PetModel.deleteMany({})
     const pets = Array(10)
       .fill(null)
       .map(() => {
         const pet = new PetModel({
           name: faker.name.firstName(),
-          age: Math.round(Math.random() * 15),
+          age: ['baby', 'young', 'adult','senior'][Math.floor(Math.random() * 4)],
           typeOfPet: ['cat', 'dog', 'others'][Math.floor(Math.random() * 3)],
           gender: ['male', 'female'][Math.floor(Math.random() * 2)],
           // breed: String,
@@ -28,26 +25,22 @@ const seedData = async () => {
           // size: String,
           photos: [
             {
-              url: faker.image.dogs()
+              url: faker.image.cats(),
             },
             {
-              url: faker.image.dogs()
+              url: faker.image.cats(),
             },
             {
-              url: faker.image.dogs()
+              url: faker.image.cats(),
             }
           ]
         })
-​
-        return pet.save()
-      })
-​
-    await Promise.all(pets)
+        return pet.save();
+      });
+    await Promise.all(pets);
   } catch (err) {
-    console.log(err.message)
+    console.log(err.message);
   }
-​
-  mongoose.connection.close()
+  mongoose.connection.close();
 }
-​
-seedData()
+seedData();

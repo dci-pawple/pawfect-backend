@@ -175,13 +175,15 @@ Route.post("/newpet", upload.any("photos"), async (req, res, next) => {
   try {
     //contains the file
     console.log("req.files", req.files);
+    const photoFiles = req.files;
+
     //contains the text fields
     console.log("req.body", JSON.parse(JSON.stringify(req.body)));
 
     //delete collection pets
     //await PetModel.deleteMany({});
 
-    const photoFiles = req.files;
+    //if ther is no photos updated => error in frontend
     if (photoFiles.length === 0) {
       console.log("No photo attached!");
       return res
@@ -232,33 +234,38 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
   try {
     //contains the file
     console.log( 'req.files', req.files )
+
     //contains the text fields
     console.log( 'req.body', JSON.parse( JSON.stringify( req.body ) ) )
-
     console.log( 'req.params.id', req.params.id )
 
-    //delete collection pets
-    //await PetModel.deleteMany({});
+    const pet = await PetModel.findById(req.params.id).select("-__v");
+
+    //! if(!req.body)
+
 
     const photoFiles = req.files
-    // if ( photoFiles.length === 0 ) {
-    //   console.log( 'No photo attached!' )
-    //   return res
-    //     .status( 400 )
-    //     .json( { success: false, message: 'No photo attached!' } )
-    // }
+
+    // if ther is a path, than we know it is a new image uploaded
+    if(photoFiles)
+    {
     let multiplePhotoPromise = photoFiles.map( photo =>
       cloudinary.uploader.upload( photo.path, { upload_preset: 'pawfect' } )
     )
 
     let photoResponses = await Promise.all( multiplePhotoPromise )
 
-    const photoUrls = photoResponses.map( item => {
+    const newPhotoUrls = photoResponses.map( item => {
       return { url: item.url, publicId: item.public_id }
     } )
-    console.log( 'photoUrls', photoUrls )
+    console.log( 'photoUrls', newPhotoUrls )
+    const updatedPhotoUrls= pet.photos.concat(newPhotoUrls);
+    console.log("updatedPhotoUrls",updatedPhotoUrls);
 
-    
+
+     
+
+
     let updatedPet =  {
       name: req.body.name,
       age: req.body.age,
@@ -270,16 +277,22 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
       habits: req.body.habits,
       size: req.body.size,
       extras: req.body.extras,
-      photos: photoUrls,
+      photos: updatedPhotoUrls,
       userId: req.body.userId
     } ;
 
-     const pet = await PetModel.findByIdAndUpdate(req.params.id, updatedPet, {
+     const updatedPetData = await PetModel.findByIdAndUpdate(req.params.id, updatedPet, {
       new: true,
     }).select("-__v");
 
-    return res.json( { success: true, message: 'Saved in the Database',data:pet } )
+    return res.json( { success: true, message: 'Updated into Database',data:updatedPetData } )
 
+    }else{
+      res.status( 500 ).json( { success: false, message: "problem updating photos" } )
+  }
+    
+
+    
     // pet.save().then( result => {
     //   console.log( 'Saved in the Database' )
     //   return res

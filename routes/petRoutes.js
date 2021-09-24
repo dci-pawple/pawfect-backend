@@ -112,6 +112,30 @@ Route.get("/filter", async (req, res, next) => {
   }
 });
 
+Route.post( "/userads", async ( req, res, next ) => {
+  const userId=req.body.userId;
+   console.log(userId);
+
+
+  try {
+    const userads = await PetModel.find( {userId: userId} ).select(
+      ' -__v'
+    )
+    if ( userads ) {
+      res.json( { success: true, data: userads } )
+    } else {
+      res.status( 500 ).json( { success: false, error: 'no ads found' } )
+    }
+  } catch ( err ) {
+    console.log( 'Error in get /userads =>', err )
+    next( err )
+  }
+});
+
+
+
+
+
 Route.get("/:id", async (req, res, next) => {
   try {
     // const pet = await PetModel.findOne({ id: req.params.id });
@@ -126,6 +150,7 @@ Route.get("/:id", async (req, res, next) => {
     next(err);
   }
 });
+
 
 /**
  * Route for new Ad
@@ -163,18 +188,21 @@ Route.post("/newpet", upload.any("photos"), async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "No photo attached!" });
     }
-    let multiplePhotoPromise = photoFiles.map((photo) =>
-      cloudinary.uploader.upload(photo.path, { upload_preset: "pawfect" })
-    );
 
-    let photoResponses = await Promise.all(multiplePhotoPromise);
+    //Send photos to cloudinary
+    let multiplePhotoPromise = photoFiles.map( photo =>
+      cloudinary.uploader.upload( photo.path, { upload_preset: 'pawfect' } )
+    )
+    let photoResponses = await Promise.all( multiplePhotoPromise )
 
-    const photoUrls = photoResponses.map((item) => {
-      return { url: item.url, publicId: item.public_id };
-    });
-    console.log("photoUrls", photoUrls);
+    // put the URLs from cloudinary into an object
+    const photoUrls = photoResponses.map( item => {
+      return { url: item.url, publicId: item.public_id }
+    } )
+    console.log( 'photoUrls', photoUrls )
 
-    let pet = new PetModel({
+    // make a new dokument in the database
+    let pet = new PetModel( {
       name: req.body.name,
       age: req.body.age,
       typeOfPet: req.body.typeOfPet,
@@ -186,17 +214,99 @@ Route.post("/newpet", upload.any("photos"), async (req, res, next) => {
       size: req.body.size,
       extras: req.body.extras,
       photos: photoUrls,
-      userId: req.body.userId,
-    });
+      userId: req.body.userId
+    } )
 
-    pet.save().then((result) => {
-      console.log("Saved in the Database");
-      return res.json({ success: true, message: "Saved in the Database" });
-    });
-  } catch (err) {
-    console.log("Error in file upload Route =>", err);
-    res.status(500).json({ success: false, message: err.message });
+    pet.save().then( result => {
+      console.log( 'Saved in the Database' )
+      return res
+        .json( { success: true, message: 'Saved in the Database',data:result } )
+    } )
+  } catch ( err ) {
+    console.log( 'Error in file upload Route =>', err )
+    res.status( 500 ).json( { success: false, message: err.message } )
   }
 });
+
+Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) => {
+  try {
+    //contains the file
+    console.log( 'req.files', req.files )
+    //contains the text fields
+    console.log( 'req.body', JSON.parse( JSON.stringify( req.body ) ) )
+
+    console.log( 'req.params.id', req.params.id )
+
+    //delete collection pets
+    //await PetModel.deleteMany({});
+
+    const photoFiles = req.files
+    // if ( photoFiles.length === 0 ) {
+    //   console.log( 'No photo attached!' )
+    //   return res
+    //     .status( 400 )
+    //     .json( { success: false, message: 'No photo attached!' } )
+    // }
+    let multiplePhotoPromise = photoFiles.map( photo =>
+      cloudinary.uploader.upload( photo.path, { upload_preset: 'pawfect' } )
+    )
+
+    let photoResponses = await Promise.all( multiplePhotoPromise )
+
+    const photoUrls = photoResponses.map( item => {
+      return { url: item.url, publicId: item.public_id }
+    } )
+    console.log( 'photoUrls', photoUrls )
+
+    
+    let updatedPet =  {
+      name: req.body.name,
+      age: req.body.age,
+      typeOfPet: req.body.typeOfPet,
+      gender: req.body.gender,
+      // breed: req.body.name,
+      likes: req.body.likes,
+      dislikes: req.body.dislikes,
+      habits: req.body.habits,
+      size: req.body.size,
+      extras: req.body.extras,
+      photos: photoUrls,
+      userId: req.body.userId
+    } ;
+
+     const pet = await PetModel.findByIdAndUpdate(req.params.id, updatedPet, {
+      new: true,
+    }).select("-__v");
+
+    return res.json( { success: true, message: 'Saved in the Database',data:pet } )
+
+    // pet.save().then( result => {
+    //   console.log( 'Saved in the Database' )
+    //   return res
+    //     .json( { success: true, message: 'Saved in the Database',data:result } )
+    // } )
+  } catch ( err ) {
+    console.log( 'Error in file upload Route =>', err )
+    res.status( 500 ).json( { success: false, message: err.message } )
+  }
+} )
+
+
+Route.get( '/:id', async ( req, res, next ) => {
+  try {
+    // const pet = await PetModel.findOne({ id: req.params.id });
+    const pet = await PetModel.findById( req.params.id ).select(
+      ' -__v'
+    )
+    if ( pet ) {
+      res.json( { success: true, data: pet } )
+    } else {
+      res.json( { success: false, error: 'no such pet found' } )
+    }
+  } catch ( err ) {
+    console.log( 'Error in pet /:id =>', err )
+    next( err )
+  }
+} )
 
 module.exports = Route;

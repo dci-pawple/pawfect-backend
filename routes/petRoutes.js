@@ -236,10 +236,25 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
     console.log( 'req.files', req.files )
 
     //contains the text fields
-    console.log( 'req.body', JSON.parse( JSON.stringify( req.body ) ) )
+    console.log( 'req.body', JSON.parse(  JSON.stringify(req.body)  ) )
     console.log( 'req.params.id', req.params.id )
 
-    const pet = await PetModel.findById(req.params.id).select("-__v");
+     const pet = await PetModel.findById(req.params.id).select("-__v");
+
+    const deleteThisPhotos= JSON.parse( req.body.deletePhotos);
+    console.log("deleteThisPhotos",deleteThisPhotos);
+    //delete imges from pet.photos
+    if(deleteThisPhotos.length!==0){
+      pet.photos = pet.photos.filter((photo)=>{
+        console.log("deleteThisPhotosssssss",deleteThisPhotos);
+        return !deleteThisPhotos.includes(photo.publicId)
+
+      })
+      console.log("pet.photos with deleted photos",pet.photos);
+
+    }
+
+   
 
     //! if(!req.body)
 
@@ -278,7 +293,8 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
       size: req.body.size,
       extras: req.body.extras,
       photos: updatedPhotoUrls,
-      userId: req.body.userId
+      userId: req.body.userId,
+      deletePhotos: req.body.deletePhotos
     } ;
 
      const updatedPetData = await PetModel.findByIdAndUpdate(req.params.id, updatedPet, {

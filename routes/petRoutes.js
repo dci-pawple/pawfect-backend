@@ -133,6 +133,52 @@ Route.post( "/userads", async ( req, res, next ) => {
 });
 
 
+Route.post( "/delete", async ( req, res, next ) => {
+
+  //! after clicking delete the site is not uptodate
+  const petId=req.body.petId;
+  console.log("petId for deleting",petId);
+  const userId=req.body.userId;
+  console.log("userId for deleting",userId);
+
+
+  try {
+
+    //delete photos on cloudinary
+    const pet = await PetModel.findById(petId).select("-__v");
+    const deleteThisPhotos=pet.photos.map((photo)=>{
+      return photo.publicId;
+    })
+    console.log("deleteThisPhotos",deleteThisPhotos);
+
+    cloudinary.api.delete_resources(deleteThisPhotos,
+  function(error, result) {console.log("delete photo on cloudinary",result, error); });
+
+    //delete pet from database
+    await PetModel.deleteOne({_id: petId},function(err, obj) {
+    if (err) throw err;
+    console.log("1 document deleted");
+    
+  });
+
+
+    //return updated ads
+   const userads = await PetModel.find( {userId: userId} ).select(
+      ' -__v'
+    )
+    if ( userads ) {
+      res.json( { success: true, data: userads } )
+    } else {
+      res.status( 500 ).json( { success: false, error: 'no ads found' } )
+    }
+   
+  } catch ( err ) {
+    console.log( 'Error in get /userads =>', err )
+    next( err )
+  }
+});
+
+
 
 
 
@@ -251,6 +297,11 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
 
       })
       console.log("pet.photos with deleted photos",pet.photos);
+
+      cloudinary.api.delete_resources(deleteThisPhotos,
+  function(error, result) {console.log("delete photo on cloudinary",result, error); });
+      //! delete button
+      
 
     }
 

@@ -135,7 +135,6 @@ Route.post( "/userads", async ( req, res, next ) => {
 
 Route.post( "/delete", async ( req, res, next ) => {
 
-  //! after clicking delete the site is not uptodate
   const petId=req.body.petId;
   console.log("petId for deleting",petId);
   const userId=req.body.userId;
@@ -146,26 +145,29 @@ Route.post( "/delete", async ( req, res, next ) => {
 
     //delete photos on cloudinary
     const pet = await PetModel.findById(petId).select("-__v");
-    const deleteThisPhotos=pet.photos.map((photo)=>{
+    const deleteAllPhotos=pet.photos.map((photo)=>{
       return photo.publicId;
     })
-    console.log("deleteThisPhotos",deleteThisPhotos);
+    console.log("deleteAllPhotos",deleteAllPhotos);
 
-    cloudinary.api.delete_resources(deleteThisPhotos,
-  function(error, result) {console.log("delete photo on cloudinary",result, error); });
+    const result1 =await cloudinary.api.delete_resources(deleteAllPhotos,
+  function(error, result) {
+    if (error) throw error;
+    console.log("deleted photo on cloudinary",result); });
+console.log("result1",result1);
 
     //delete pet from database
-    await PetModel.deleteOne({_id: petId},function(err, obj) {
-    if (err) throw err;
-    console.log("1 document deleted");
+    const result = await PetModel.deleteOne({_id: petId});
     
-  });
-
+  console.log("1 document deleted");
+console.log("result",result);
 
     //return updated ads
    const userads = await PetModel.find( {userId: userId} ).select(
       ' -__v'
     )
+    console.log("userads=>",userads);
+
     if ( userads ) {
       res.json( { success: true, data: userads } )
     } else {

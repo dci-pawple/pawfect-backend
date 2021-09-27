@@ -133,6 +133,54 @@ Route.post( "/userads", async ( req, res, next ) => {
 });
 
 
+Route.post( "/delete", async ( req, res, next ) => {
+
+  const petId=req.body.petId;
+  console.log("petId for deleting",petId);
+  const userId=req.body.userId;
+  console.log("userId for deleting",userId);
+
+
+  try {
+
+    //delete photos on cloudinary
+    const pet = await PetModel.findById(petId).select("-__v");
+    const deleteAllPhotos=pet.photos.map((photo)=>{
+      return photo.publicId;
+    })
+    console.log("deleteAllPhotos",deleteAllPhotos);
+
+    const result1 =await cloudinary.api.delete_resources(deleteAllPhotos,
+  function(error, result) {
+    if (error) throw error;
+    console.log("deleted photo on cloudinary",result); });
+console.log("result1",result1);
+
+    //delete pet from database
+    const result = await PetModel.deleteOne({_id: petId});
+    
+  console.log("1 document deleted");
+console.log("result",result);
+
+    //return updated ads
+   const userads = await PetModel.find( {userId: userId} ).select(
+      ' -__v'
+    )
+    console.log("userads=>",userads);
+
+    if ( userads ) {
+      res.json( { success: true, data: userads } )
+    } else {
+      res.status( 500 ).json( { success: false, error: 'no ads found' } )
+    }
+   
+  } catch ( err ) {
+    console.log( 'Error in get /userads =>', err )
+    next( err )
+  }
+});
+
+
 
 
 
@@ -236,10 +284,30 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
     console.log( 'req.files', req.files )
 
     //contains the text fields
-    console.log( 'req.body', JSON.parse( JSON.stringify( req.body ) ) )
+    console.log( 'req.body', JSON.parse(  JSON.stringify(req.body)  ) )
     console.log( 'req.params.id', req.params.id )
 
-    const pet = await PetModel.findById(req.params.id).select("-__v");
+     const pet = await PetModel.findById(req.params.id).select("-__v");
+
+    const deleteThisPhotos= JSON.parse( req.body.deletePhotos);
+    console.log("deleteThisPhotos",deleteThisPhotos);
+    //delete imges from pet.photos
+    if(deleteThisPhotos.length!==0){
+      pet.photos = pet.photos.filter((photo)=>{
+        console.log("deleteThisPhotosssssss",deleteThisPhotos);
+        return !deleteThisPhotos.includes(photo.publicId)
+
+      })
+      console.log("pet.photos with deleted photos",pet.photos);
+
+      cloudinary.api.delete_resources(deleteThisPhotos,
+  function(error, result) {console.log("delete photo on cloudinary",result, error); });
+      //! delete button
+      
+
+    }
+
+   
 
     //! if(!req.body)
 
@@ -278,7 +346,8 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
       size: req.body.size,
       extras: req.body.extras,
       photos: updatedPhotoUrls,
-      userId: req.body.userId
+      userId: req.body.userId,
+      deletePhotos: req.body.deletePhotos
     } ;
 
      const updatedPetData = await PetModel.findByIdAndUpdate(req.params.id, updatedPet, {

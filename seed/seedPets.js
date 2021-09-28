@@ -39,7 +39,6 @@ const seedData = async () => {
       });
     await Promise.all(pets);
   } catch (err) {
-    console.log(err.message);
   }
   mongoose.connection.close();
 }

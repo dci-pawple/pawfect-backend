@@ -27,7 +27,6 @@ const seedData = async () => {
 
     await Promise.all(users);
   } catch (err) {
-    console.log(err.message);
   }
 
   mongoose.connection.close();

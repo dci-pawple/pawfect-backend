@@ -11,7 +11,7 @@ const Route = express.Router();
 const multer = require("multer");
 
 Route.get("/", async (req, res, next) => {
-  console.log("pets");
+
   try {
     const pets = await PetModel.find({});
     res.json({ succes: true, data: pets });
@@ -23,7 +23,7 @@ Route.get("/", async (req, res, next) => {
 //! http://localhost:4000/pets/filter?favorites=true&userId=6140a1fff6f5582afa47550b
 
 Route.get("/filter", async (req, res, next) => {
-  console.log("req.query", req.query);
+
   try {
     // parse all
     const type = req.query.type ? req.query.type : "";
@@ -36,21 +36,11 @@ Route.get("/filter", async (req, res, next) => {
 
     let user = null;
 
-    //log all
-    console.log({ type });
-    console.log({ age });
-    console.log({ userId });
-    console.log({ favorites });
 
     //   const age = JSON.parse(req.query.age) ? JSON.parse(req.query.age):"";
     //   const favorites = JSON.parse(req.query.favorites) ? JSON.parse(req.query.favorites):"";
     //   const userId = JSON.parse(req.query.userId) && JSON.parse(req.query.userId)!=="" ? JSON.parse(req.query.userId):"";
-    //
-    //   console.log('type', type)
-    //   console.log({ age })
-    //   //  console.log({ user })
-    //   console.log({ userId })
-    //   console.log({ favorites })
+
 
     let currentFilter = [];
     // if type is not empty and type is not "all" than insert as an filterelement esle empty filter
@@ -64,12 +54,9 @@ Route.get("/filter", async (req, res, next) => {
 
     // if logged in
     if (userId || (userId && favorites)) {
-      console.log("logged in user");
-      console.log({ userId });
       [user] = await UserModel.find({ _id: userId }).select(
         "-_id -password -__v"
       );
-      console.log("user in filter route", user);
       if (!user) {
         next(new createError.NotFound("no user with such id found"));
       }
@@ -84,8 +71,6 @@ Route.get("/filter", async (req, res, next) => {
     currentFilter = {
       $and: currentFilter,
     };
-    //
-    console.log("current Filter", currentFilter);
 
     let filteredData = [];
     filteredData = await PetModel.find(currentFilter);
@@ -114,7 +99,6 @@ Route.get("/filter", async (req, res, next) => {
 
 Route.post( "/userads", async ( req, res, next ) => {
   const userId=req.body.userId;
-   console.log(userId);
 
 
   try {
@@ -127,18 +111,14 @@ Route.post( "/userads", async ( req, res, next ) => {
       res.status( 500 ).json( { success: false, error: 'no ads found' } )
     }
   } catch ( err ) {
-    console.log( 'Error in get /userads =>', err )
     next( err )
   }
 });
 
 
 Route.post( "/delete", async ( req, res, next ) => {
-
   const petId=req.body.petId;
-  console.log("petId for deleting",petId);
   const userId=req.body.userId;
-  console.log("userId for deleting",userId);
 
 
   try {
@@ -148,25 +128,24 @@ Route.post( "/delete", async ( req, res, next ) => {
     const deleteAllPhotos=pet.photos.map((photo)=>{
       return photo.publicId;
     })
-    console.log("deleteAllPhotos",deleteAllPhotos);
+   
 
     const result1 =await cloudinary.api.delete_resources(deleteAllPhotos,
   function(error, result) {
     if (error) throw error;
-    console.log("deleted photo on cloudinary",result); });
-console.log("result1",result1);
+    
+  });
+
 
     //delete pet from database
     const result = await PetModel.deleteOne({_id: petId});
-    
-  console.log("1 document deleted");
-console.log("result",result);
+
 
     //return updated ads
    const userads = await PetModel.find( {userId: userId} ).select(
       ' -__v'
     )
-    console.log("userads=>",userads);
+
 
     if ( userads ) {
       res.json( { success: true, data: userads } )
@@ -175,7 +154,6 @@ console.log("result",result);
     }
    
   } catch ( err ) {
-    console.log( 'Error in get /userads =>', err )
     next( err )
   }
 });
@@ -194,7 +172,6 @@ Route.get("/:id", async (req, res, next) => {
       res.json({ success: false, error: "no such pet found" });
     }
   } catch (err) {
-    console.log("Error in pet /:id =>", err);
     next(err);
   }
 });
@@ -221,19 +198,10 @@ let upload = multer({ storage: storage });
 
 Route.post("/newpet", upload.any("photos"), async (req, res, next) => {
   try {
-    //contains the file
-    console.log("req.files", req.files);
-    const photoFiles = req.files;
 
-    //contains the text fields
-    console.log("req.body", JSON.parse(JSON.stringify(req.body)));
-
-    //delete collection pets
-    //await PetModel.deleteMany({});
 
     //if ther is no photos updated => error in frontend
     if (photoFiles.length === 0) {
-      console.log("No photo attached!");
       return res
         .status(400)
         .json({ success: false, message: "No photo attached!" });
@@ -249,7 +217,7 @@ Route.post("/newpet", upload.any("photos"), async (req, res, next) => {
     const photoUrls = photoResponses.map( item => {
       return { url: item.url, publicId: item.public_id }
     } )
-    console.log( 'photoUrls', photoUrls )
+
 
     // make a new dokument in the database
     let pet = new PetModel( {
@@ -268,42 +236,32 @@ Route.post("/newpet", upload.any("photos"), async (req, res, next) => {
     } )
 
     pet.save().then( result => {
-      console.log( 'Saved in the Database' )
+
       return res
         .json( { success: true, message: 'Saved in the Database',data:result } )
     } )
   } catch ( err ) {
-    console.log( 'Error in file upload Route =>', err )
     res.status( 500 ).json( { success: false, message: err.message } )
   }
 });
 
 Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) => {
   try {
-    //contains the file
-    console.log( 'req.files', req.files )
-
-    //contains the text fields
-    console.log( 'req.body', JSON.parse(  JSON.stringify(req.body)  ) )
-    console.log( 'req.params.id', req.params.id )
 
      const pet = await PetModel.findById(req.params.id).select("-__v");
 
     const deleteThisPhotos= JSON.parse( req.body.deletePhotos);
-    console.log("deleteThisPhotos",deleteThisPhotos);
+
     //delete imges from pet.photos
     if(deleteThisPhotos.length!==0){
       pet.photos = pet.photos.filter((photo)=>{
-        console.log("deleteThisPhotosssssss",deleteThisPhotos);
         return !deleteThisPhotos.includes(photo.publicId)
 
       })
-      console.log("pet.photos with deleted photos",pet.photos);
 
       cloudinary.api.delete_resources(deleteThisPhotos,
   function(error, result) {console.log("delete photo on cloudinary",result, error); });
       //! delete button
-      
 
     }
 
@@ -326,13 +284,8 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
     const newPhotoUrls = photoResponses.map( item => {
       return { url: item.url, publicId: item.public_id }
     } )
-    console.log( 'photoUrls', newPhotoUrls )
+
     const updatedPhotoUrls= pet.photos.concat(newPhotoUrls);
-    console.log("updatedPhotoUrls",updatedPhotoUrls);
-
-
-     
-
 
     let updatedPet =  {
       name: req.body.name,
@@ -359,16 +312,8 @@ Route.patch( '/updatepet/:id', upload.any( 'photos' ), async ( req, res, next ) 
     }else{
       res.status( 500 ).json( { success: false, message: "problem updating photos" } )
   }
-    
 
-    
-    // pet.save().then( result => {
-    //   console.log( 'Saved in the Database' )
-    //   return res
-    //     .json( { success: true, message: 'Saved in the Database',data:result } )
-    // } )
   } catch ( err ) {
-    console.log( 'Error in file upload Route =>', err )
     res.status( 500 ).json( { success: false, message: err.message } )
   }
 } )
@@ -386,7 +331,6 @@ Route.get( '/:id', async ( req, res, next ) => {
       res.json( { success: false, error: 'no such pet found' } )
     }
   } catch ( err ) {
-    console.log( 'Error in pet /:id =>', err )
     next( err )
   }
 } )
